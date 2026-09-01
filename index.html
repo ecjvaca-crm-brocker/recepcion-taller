@@ -257,10 +257,9 @@
         </section>
 
     </main>
-
-    <script>
+<script>
         // PEGA AQUÍ LA URL DE TU GOOGLE APPS SCRIPT
-        const GOOGLE_SHEETS_WEBHOOK_URL = "AKfycbxH4VDx8zR8d-LNpnwbHwWODkQQUNFk_76RLGyk9kDDixBPaxLm_YeLeohoHkpsUh7R";
+        const GOOGLE_SHEETS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxH4VDx8zR8d-LNpnwbHwWODkQQUNFk_76RLGyk9kDDixBPaxLm_YeLeohoHkpsUh7R/exec";
 
         const serviciosData = [
             { id: 'abrillantado', nombre: 'ABRILLANTADO', detalle: 'Tratamiento para recuperar brillo y eliminar opacidad superficial.', precios: { sedan: 31.25, suv: 50.00, camioneta: 62.50 }, tiempo: { sedan: '2-3 HRS', suv: '3-5 HRS', camioneta: '5-6 HRS' } },
@@ -295,7 +294,7 @@
             document.getElementById(tabId).classList.remove('hidden');
             ['cliente', 'inspeccion', 'servicios', 'resumen'].forEach(name => {
                 const btn = document.getElementById('btn-tab-' + name);
-                btn.classList.toggle('tab-active', 'tab-' + name === tabId);
+                if (btn) btn.classList.toggle('tab-active', 'tab-' + name === tabId);
             });
             if (tabId === 'tab-resumen') actualizarResumen();
             if (window.lucide) lucide.createIcons();
@@ -389,27 +388,23 @@
                 .st1{fill:#1e293b;stroke:#0284c7;stroke-width:1.5;}
                 .text{fill:#94a3b8;font-family:sans-serif;font-size:11px;font-weight:bold;}
             </style>
-            <!-- LADO DERECHO -->
             <text x="50" y="25" class="text">LADO DERECHO</text>
             <path class="st0" d="M 20 110 Q 30 75 70 70 L 110 70 Q 140 70 160 110 L 180 115 Q 185 130 180 140 L 20 140 Z"/>
             <circle class="st1" cx="50" cy="140" r="14"/><circle class="st1" cx="150" cy="140" r="14"/>
             <path class="st0" d="M 70 75 L 105 75 L 105 105 L 55 105 Z M 110 75 L 150 75 L 150 105 L 110 105 Z"/>
 
-            <!-- FRENTE -->
             <text x="260" y="25" class="text">FRENTE</text>
             <path class="st0" d="M 230 135 L 235 95 Q 240 75 270 70 L 310 70 Q 340 75 345 95 L 350 135 Z"/>
             <rect x="240" y="105" width="25" height="12" rx="3" class="st0"/>
             <rect x="315" y="105" width="25" height="12" rx="3" class="st0"/>
             <rect x="270" y="115" width="40" height="15" class="st0"/>
 
-            <!-- POSTERIOR -->
             <text x="460" y="25" class="text">POSTERIOR</text>
             <path class="st0" d="M 430 135 L 435 95 Q 440 75 470 70 L 510 70 Q 540 75 545 95 L 550 135 Z"/>
             <rect x="440" y="100" width="30" height="10" rx="2" class="st1"/>
             <rect x="510" y="100" width="30" height="10" rx="2" class="st1"/>
             <rect x="470" y="115" width="40" height="12" class="st0"/>
 
-            <!-- LADO IZQUIERDO -->
             <text x="640" y="25" class="text">LADO IZQUIERDO</text>
             <path class="st0" d="M 600 110 Q 610 75 650 70 L 690 70 Q 720 70 740 110 L 760 115 Q 765 130 760 140 L 600 140 Z"/>
             <circle class="st1" cx="630" cy="140" r="14"/><circle class="st1" cx="730" cy="140" r="14"/>
@@ -492,10 +487,19 @@
             document.getElementById('resumenTotal').innerText = '$' + calcularTotal();
         }
 
-        function guardarEnGoogleSheets() {
-            if (!GOOGLE_SHEETS_WEBHOOK_URL || GOOGLE_SHEETS_WEBHOOK_URL.includes("TU_SCRIPT_ID_AQUI")) return;
+        async function enviarWhatsApp(evt) {
+            const btn = evt ? evt.currentTarget : event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<span>⏳ Registrando datos...</span>`;
+            btn.disabled = true;
 
+            const cliente = document.getElementById('nombreCliente').value || 'Estimado(a) cliente';
+            const telefono = document.getElementById('telefonoCliente').value.replace(/\D/g, '');
+            const marca = document.getElementById('marcaVehiculo').value || 'Vehículo';
+            const modelo = document.getElementById('modeloVehiculo').value || '';
             const tipo = document.getElementById('tipoVehiculo').value;
+            const total = calcularTotal();
+
             const listaServicios = [];
             selectedServices.forEach(id => {
                 const s = serviciosData.find(item => item.id === id);
@@ -507,29 +511,25 @@
                 nombre: document.getElementById('nombreCliente').value || 'Sin Nombre',
                 telefono: document.getElementById('telefonoCliente').value || 'Sin Teléfono',
                 email: document.getElementById('emailCliente').value || 'Sin Email',
-                vehiculo: `${document.getElementById('marcaVehiculo').value} ${document.getElementById('modeloVehiculo').value}`,
+                vehiculo: `${marca} ${modelo}`,
                 placa: document.getElementById('placasVehiculo').value || 'Sin Placa',
-                total: '$' + calcularTotal(),
+                total: '$' + total,
                 servicios: listaServicios.join(', ')
             };
 
-            fetch(GOOGLE_SHEETS_WEBHOOK_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            }).catch(err => console.error("Error al sincronizar con Google Sheets:", err));
-        }
-
-        function enviarWhatsApp() {
-            guardarEnGoogleSheets();
-
-            const cliente = document.getElementById('nombreCliente').value || 'Estimado(a) cliente';
-            const telefono = document.getElementById('telefonoCliente').value.replace(/\D/g, '');
-            const marca = document.getElementById('marcaVehiculo').value || 'Vehículo';
-            const modelo = document.getElementById('modeloVehiculo').value || '';
-            const tipo = document.getElementById('tipoVehiculo').value;
-            const total = calcularTotal();
+            // Envío a Google Sheets (no-cors garantiza la ejecución en Apps Script)
+            try {
+                if (GOOGLE_SHEETS_WEBHOOK_URL) {
+                    await fetch(GOOGLE_SHEETS_WEBHOOK_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                }
+            } catch (err) {
+                console.error("Error al enviar a Google Sheets:", err);
+            }
 
             let msj = `*Kmotorstudio Detailing* 🚗✨\n`;
             msj += `*Cotización y Recepción Vehicular*\n\n`;
@@ -546,6 +546,10 @@
 
             const encoded = encodeURIComponent(msj);
             const num = telefono.startsWith('593') ? telefono : '593' + telefono.replace(/^0/, '');
+            
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+
             window.open(`https://wa.me/${num}?text=${encoded}`, '_blank');
         }
     </script>
