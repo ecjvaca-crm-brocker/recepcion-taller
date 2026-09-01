@@ -135,9 +135,7 @@
                     <i data-lucide="check-square" class="w-5 h-5 text-sky-600"></i>
                     <span>Inventario de Accesorios</span>
                 </h2>
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3" id="inventarioContainer">
-                    <!-- Checks renderizados via JS -->
-                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3" id="inventarioContainer"></div>
             </div>
 
             <!-- Nivel de Combustible & Testigos -->
@@ -158,9 +156,7 @@
                             <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-500"></i>
                             <span>Testigos Encendidos en Tablero</span>
                         </h3>
-                        <div class="flex flex-wrap gap-2" id="testigosContainer">
-                            <!-- Iconos testigos via JS -->
-                        </div>
+                        <div class="flex flex-wrap gap-2" id="testigosContainer"></div>
                     </div>
                 </div>
             </div>
@@ -177,9 +173,9 @@
                         <span>Limpiar Marcas</span>
                     </button>
                 </div>
-                <p class="text-xs text-slate-500 mb-3">Dibuje o marque con el dedo / stylus sobre el esquema los detalles, golpes o rayones encontrados.</p>
-                <div class="relative w-full overflow-hidden border border-slate-200 rounded-lg bg-white flex justify-center">
-                    <canvas id="carCanvas" width="750" height="280" class="w-full max-w-full h-auto cursor-crosshair"></canvas>
+                <p class="text-xs text-slate-500 mb-3">Dibuje o marque sobre el esquema los detalles, golpes o rayones encontrados.</p>
+                <div class="relative w-full overflow-hidden border border-slate-200 rounded-lg bg-slate-900 flex justify-center p-2">
+                    <canvas id="carCanvas" width="800" height="300" class="w-full max-w-full h-auto cursor-crosshair rounded"></canvas>
                 </div>
             </div>
 
@@ -204,18 +200,14 @@
                     <span id="tipoVehiculoBadge" class="text-xs font-bold uppercase bg-sky-100 text-sky-800 px-3 py-1 rounded-full">Sedán / HB</span>
                 </div>
                 
-                <div id="serviciosGrid" class="space-y-3">
-                    <!-- Lista de servicios renderizados por JS -->
-                </div>
+                <div id="serviciosGrid" class="space-y-3"></div>
 
-                <!-- Observaciones Adicionales -->
                 <div class="mt-5 pt-4 border-t border-slate-200">
                     <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Trabajos / Observaciones Especiales Adicionales</label>
                     <textarea id="observacionesTrabajo" rows="3" placeholder="Ej. Pulido de cristales, limpieza profunda de tapicería, detalle de motor..." class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-sky-500 outline-none"></textarea>
                 </div>
             </div>
 
-            <!-- Resumen Totales -->
             <div class="bg-slate-900 text-white rounded-xl p-5 shadow-lg flex justify-between items-center">
                 <div>
                     <span class="text-xs text-slate-400 block uppercase font-semibold">Total Estimado Cotizado</span>
@@ -234,7 +226,7 @@
                     <i data-lucide="check-circle-2" class="w-10 h-10"></i>
                 </div>
                 <h2 class="text-xl font-bold text-slate-800">¡Hoja de Recepción Completada!</h2>
-                <p class="text-xs sm:text-sm text-slate-600 max-w-md mx-auto">La orden de recepción y cotización ha sido calculada. Puedes enviarla directamente por WhatsApp al cliente o descargar la versión para guardar/imprimir.</p>
+                <p class="text-xs sm:text-sm text-slate-600 max-w-md mx-auto">La orden ha sido procesada. Al enviar por WhatsApp, los datos se registrarán automáticamente en tu hoja de Google Sheets para sincronizar con HubSpot Free.</p>
                 
                 <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-left space-y-2 text-xs sm:text-sm max-w-lg mx-auto">
                     <div class="flex justify-between">
@@ -254,7 +246,7 @@
                 <div class="pt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md mx-auto">
                     <button onclick="enviarWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl shadow-md flex items-center justify-center space-x-2 text-sm">
                         <i data-lucide="message-square" class="w-5 h-5"></i>
-                        <span>Enviar por WhatsApp</span>
+                        <span>Enviar por WhatsApp & Guardar</span>
                     </button>
                     <button onclick="window.print()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-4 rounded-xl shadow-md flex items-center justify-center space-x-2 text-sm">
                         <i data-lucide="printer" class="w-5 h-5"></i>
@@ -267,93 +259,32 @@
     </main>
 
     <script>
-        // Catalogo de Servicios y Precios Oficiales de K-Shield
+        // PEGA AQUÍ LA URL DE TU GOOGLE APPS SCRIPT
+        const GOOGLE_SHEETS_WEBHOOK_URL = "https://script.google.com/macros/s/TU_SCRIPT_ID_AQUI/exec";
+
         const serviciosData = [
-            {
-                id: 'abrillantado',
-                nombre: 'ABRILLANTADO',
-                detalle: 'Tratamiento diseñado para recuperar el brillo perdido. Elimina opacidad superficial y resalta la profundidad del color.',
-                precios: { sedan: 31.25, suv: 50.00, camioneta: 62.50 },
-                tiempo: { sedan: '2-3 HRS', suv: '3-5 HRS', camioneta: '5-6 HRS' }
-            },
-            {
-                id: 'pulido',
-                nombre: 'PULIDO DE PINTURA',
-                detalle: 'Corrección de pintura que elimina defectos graves (swirls, rayas, manchas de agua). Corte + refinado.',
-                precios: { sedan: 56.25, suv: 75.00, camioneta: 93.75 },
-                tiempo: { sedan: '6-8 HRS', suv: '8-12 HRS', camioneta: '12-16 HRS' }
-            },
-            {
-                id: 'faros',
-                nombre: 'RESTAURACIÓN DE FAROS (Par)',
-                detalle: 'Proceso técnico para recuperar la transparencia de ópticas deslucidas/amarillentas con protección UV.',
-                precios: { sedan: 18.75, suv: 25.00, camioneta: 31.25 },
-                tiempo: { sedan: '1-2 HRS', suv: '1-2 HRS', camioneta: '1-2 HRS' }
-            },
-            {
-                id: 'sellador_nano',
-                nombre: 'SELLADOR BIO-NANO (Protección 6 Meses)',
-                detalle: 'Aplicación de sellador sintético bionanotecnológico con alta hidrofobia y suavidad al tacto.',
-                precios: { sedan: 144.30, suv: 163.33, camioneta: 197.11 },
-                tiempo: { sedan: '6 HORAS', suv: '8 HORAS', camioneta: '12 HORAS' }
-            },
-            {
-                id: 'coating_1ano',
-                nombre: 'COATING NANO-GRAFENO BX (Protección 1 Año)',
-                detalle: 'Protección con nanotecnología de grafeno. Excelente resistencia al calor y repelencia a la suciedad.',
-                precios: { sedan: 244.86, suv: 294.86, camioneta: 344.86 },
-                tiempo: { sedan: '6 HORAS', suv: '8 HORAS', camioneta: '12 HORAS' }
-            },
-            {
-                id: 'coating_2anos',
-                nombre: 'COATING CERÁMICO AYICON V4 (Protección 2 Años)',
-                detalle: 'Capa dura y cristalina con efecto espejo y autolimpieza. Protección contra micro-rayas y excrementos.',
-                precios: { sedan: 318.16, suv: 374.59, camioneta: 422.26 },
-                tiempo: { sedan: '12 HORAS', suv: '12 HORAS', camioneta: '12 HORAS' }
-            },
-            {
-                id: 'coating_3anos',
-                nombre: 'COATING CERÁMICO HYBRID GRAPHENE (Protección 3 Años)',
-                detalle: 'Tratamiento avanzado que combina la dureza cerámica con flexibilidad y disipación térmica (pH 2 a 12).',
-                precios: { sedan: 387.39, suv: 445.08, camioneta: 491.50 },
-                tiempo: { sedan: '14 HORAS', suv: '14 HORAS', camioneta: '14 HORAS' }
-            },
-            {
-                id: 'coating_7anos',
-                nombre: 'COATING CERÁMICO NANO GRAPHENE+ (Protección 7 Años)',
-                detalle: 'Recubrimiento de grafeno de grado profesional. Máxima dureza estructural y protección extrema.',
-                precios: { sedan: 505.76, suv: 563.44, camioneta: 609.86 },
-                tiempo: { sedan: '24 HORAS', suv: '24 HORAS', camioneta: '24 HORAS' }
-            }
+            { id: 'abrillantado', nombre: 'ABRILLANTADO', detalle: 'Tratamiento para recuperar brillo y eliminar opacidad superficial.', precios: { sedan: 31.25, suv: 50.00, camioneta: 62.50 }, tiempo: { sedan: '2-3 HRS', suv: '3-5 HRS', camioneta: '5-6 HRS' } },
+            { id: 'pulido', nombre: 'PULIDO DE PINTURA', detalle: 'Corrección de pintura: elimina swirls, rayas y manchas de agua.', precios: { sedan: 56.25, suv: 75.00, camioneta: 93.75 }, tiempo: { sedan: '6-8 HRS', suv: '8-12 HRS', camioneta: '12-16 HRS' } },
+            { id: 'faros', nombre: 'RESTAURACIÓN DE FAROS (Par)', detalle: 'Recupera transparencia con protección UV.', precios: { sedan: 18.75, suv: 25.00, camioneta: 31.25 }, tiempo: { sedan: '1-2 HRS', suv: '1-2 HRS', camioneta: '1-2 HRS' } },
+            { id: 'sellador_nano', nombre: 'SELLADOR BIO-NANO (6 Meses)', detalle: 'Sellador sintético bionanotecnológico de alta hidrofobia.', precios: { sedan: 144.30, suv: 163.33, camioneta: 197.11 }, tiempo: { sedan: '6 HORAS', suv: '8 HORAS', camioneta: '12 HORAS' } },
+            { id: 'coating_1ano', nombre: 'COATING NANO-GRAFENO BX (1 Año)', detalle: 'Protección con nanotecnología de grafeno.', precios: { sedan: 244.86, suv: 294.86, camioneta: 344.86 }, tiempo: { sedan: '6 HORAS', suv: '8 HORAS', camioneta: '12 HORAS' } },
+            { id: 'coating_2anos', nombre: 'COATING CERÁMICO AYICON V4 (2 Años)', detalle: 'Capa cristalina con efecto espejo y autolimpieza.', precios: { sedan: 318.16, suv: 374.59, camioneta: 422.26 }, tiempo: { sedan: '12 HORAS', suv: '12 HORAS', camioneta: '12 HORAS' } },
+            { id: 'coating_3anos', nombre: 'COATING CERÁMICO HYBRID GRAPHENE (3 Años)', detalle: 'Dureza cerámica + flexibilidad térmica (pH 2 a 12).', precios: { sedan: 387.39, suv: 445.08, camioneta: 491.50 }, tiempo: { sedan: '14 HORAS', suv: '14 HORAS', camioneta: '14 HORAS' } },
+            { id: 'coating_7anos', nombre: 'COATING CERÁMICO NANO GRAPHENE+ (7 Años)', detalle: 'Grafeno profesional de máxima dureza estructural.', precios: { sedan: 505.76, suv: 563.44, camioneta: 609.86 }, tiempo: { sedan: '24 HORAS', suv: '24 HORAS', camioneta: '24 HORAS' } }
         ];
 
-        const inventarioItems = [
-            "Gato Hidráulico", "Herramientas", "Triángulos", "Tapetes",
-            "Llanta Refacción", "Extintor", "Antena", "Emblemas",
-            "Tapones Rueda", "Cables", "Estéreo", "Encendedor"
-        ];
-
-        const testigosList = [
-            { id: 'abs', label: 'ABS' },
-            { id: 'engine', label: 'Motor' },
-            { id: 'oil', label: 'Aceite' },
-            { id: 'battery', label: 'Batería' },
-            { id: 'brake', label: 'Freno' },
-            { id: 'temp', label: 'Temp' }
-        ];
+        const inventarioItems = ["Gato Hidráulico", "Herramientas", "Triángulos", "Tapetes", "Llanta Refacción", "Extintor", "Antena", "Emblemas", "Tapones Rueda", "Cables", "Estéreo", "Encendedor"];
+        const testigosList = [{ id: 'abs', label: 'ABS' }, { id: 'engine', label: 'Motor' }, { id: 'oil', label: 'Aceite' }, { id: 'battery', label: 'Batería' }, { id: 'brake', label: 'Freno' }, { id: 'temp', label: 'Temp' }];
 
         let selectedServices = new Set();
         let selectedTestigos = new Set();
 
         window.onload = function() {
-            if (window.lucide) {
-                lucide.createIcons();
-            }
+            if (window.lucide) lucide.createIcons();
             renderInventario();
             renderTestigos();
             renderServicios();
             initCanvas();
-            
             document.getElementById('fuelGauge').addEventListener('input', (e) => {
                 document.getElementById('fuelValue').innerText = e.target.value + '%';
             });
@@ -362,28 +293,16 @@
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.getElementById(tabId).classList.remove('hidden');
-            
             ['cliente', 'inspeccion', 'servicios', 'resumen'].forEach(name => {
                 const btn = document.getElementById('btn-tab-' + name);
-                if ('tab-' + name === tabId) {
-                    btn.classList.add('tab-active');
-                } else {
-                    btn.classList.remove('tab-active');
-                }
+                btn.classList.toggle('tab-active', 'tab-' + name === tabId);
             });
-
-            if (tabId === 'tab-resumen') {
-                actualizarResumen();
-            }
-            
-            if (window.lucide) {
-                lucide.createIcons();
-            }
+            if (tabId === 'tab-resumen') actualizarResumen();
+            if (window.lucide) lucide.createIcons();
         }
 
         function renderInventario() {
-            const container = document.getElementById('inventarioContainer');
-            container.innerHTML = inventarioItems.map((item, idx) => `
+            document.getElementById('inventarioContainer').innerHTML = inventarioItems.map((item, idx) => `
                 <label class="flex items-center space-x-2 bg-slate-50 border border-slate-200 p-2.5 rounded-lg cursor-pointer hover:bg-sky-50 transition">
                     <input type="checkbox" id="inv_${idx}" class="w-4 h-4 accent-sky-600 rounded">
                     <span class="text-xs font-medium text-slate-700">${item}</span>
@@ -392,10 +311,9 @@
         }
 
         function renderTestigos() {
-            const container = document.getElementById('testigosContainer');
-            container.innerHTML = testigosList.map(t => `
-                <button type="button" onclick="toggleTestigo('${t.id}')" id="testigo_${t.id}" class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-300 text-slate-600 hover:bg-slate-100 flex items-center space-x-1">
-                    <span>${t.label}</span>
+            document.getElementById('testigosContainer').innerHTML = testigosList.map(t => `
+                <button type="button" onclick="toggleTestigo('${t.id}')" id="testigo_${t.id}" class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-300 text-slate-600 hover:bg-slate-100">
+                    ${t.label}
                 </button>
             `).join('');
         }
@@ -416,22 +334,20 @@
             const labels = { sedan: 'Sedán / Hatchback', suv: 'SUV / Medianos', camioneta: 'Camionetas / Grandes' };
             document.getElementById('tipoVehiculoBadge').innerText = labels[tipo];
 
-            const grid = document.getElementById('serviciosGrid');
-            grid.innerHTML = serviciosData.map(s => {
+            document.getElementById('serviciosGrid').innerHTML = serviciosData.map(s => {
                 const precio = s.precios[tipo].toFixed(2);
                 const tiempo = s.tiempo[tipo];
                 const isSelected = selectedServices.has(s.id);
-
                 return `
-                    <div id="card_${s.id}" onclick="toggleServicio('${s.id}')" class="service-card cursor-pointer border rounded-xl p-3.5 bg-white transition hover:shadow-sm ${isSelected ? 'selected' : 'border-slate-200'}">
+                    <div onclick="toggleServicio('${s.id}')" class="service-card cursor-pointer border rounded-xl p-3.5 bg-white transition hover:shadow-sm ${isSelected ? 'selected' : 'border-slate-200'}">
                         <div class="flex justify-between items-start">
                             <div class="flex items-start space-x-3">
                                 <input type="checkbox" ${isSelected ? 'checked' : ''} class="mt-1 w-4 h-4 accent-sky-600 rounded">
                                 <div>
                                     <h3 class="font-bold text-slate-800 text-sm">${s.nombre}</h3>
                                     <p class="text-xs text-slate-500 mt-0.5">${s.detalle}</p>
-                                    <div class="mt-2 flex items-center space-x-3 text-xs text-slate-600">
-                                        <span class="bg-slate-100 px-2 py-0.5 rounded flex items-center gap-1 font-medium">
+                                    <div class="mt-2 text-xs text-slate-600">
+                                        <span class="bg-slate-100 px-2 py-0.5 rounded flex items-center gap-1 font-medium w-fit">
                                             <i data-lucide="clock" class="w-3 h-3 text-slate-400"></i> ${tiempo}
                                         </span>
                                     </div>
@@ -444,19 +360,13 @@
                     </div>
                 `;
             }).join('');
-            
-            if (window.lucide) {
-                lucide.createIcons();
-            }
+            if (window.lucide) lucide.createIcons();
             calcularTotal();
         }
 
         function toggleServicio(id) {
-            if (selectedServices.has(id)) {
-                selectedServices.delete(id);
-            } else {
-                selectedServices.add(id);
-            }
+            if (selectedServices.has(id)) selectedServices.delete(id);
+            else selectedServices.add(id);
             renderServicios();
         }
 
@@ -471,14 +381,50 @@
             return total.toFixed(2);
         }
 
-        // Canvas Diagrama Carroceria
+        // ESQUEMA PROFESIONAL AUTOMOTRIZ CON SVG VECTORIAL
         let canvas, ctx, isDrawing = false;
+        const carSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" width="800" height="300">
+            <style>
+                .st0{fill:none;stroke:#38bdf8;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+                .st1{fill:#1e293b;stroke:#0284c7;stroke-width:1.5;}
+                .text{fill:#94a3b8;font-family:sans-serif;font-size:11px;font-weight:bold;}
+            </style>
+            <!-- LADO DERECHO -->
+            <text x="50" y="25" class="text">LADO DERECHO</text>
+            <path class="st0" d="M 20 110 Q 30 75 70 70 L 110 70 Q 140 70 160 110 L 180 115 Q 185 130 180 140 L 20 140 Z"/>
+            <circle class="st1" cx="50" cy="140" r="14"/><circle class="st1" cx="150" cy="140" r="14"/>
+            <path class="st0" d="M 70 75 L 105 75 L 105 105 L 55 105 Z M 110 75 L 150 75 L 150 105 L 110 105 Z"/>
+
+            <!-- FRENTE -->
+            <text x="260" y="25" class="text">FRENTE</text>
+            <path class="st0" d="M 230 135 L 235 95 Q 240 75 270 70 L 310 70 Q 340 75 345 95 L 350 135 Z"/>
+            <rect x="240" y="105" width="25" height="12" rx="3" class="st0"/>
+            <rect x="315" y="105" width="25" height="12" rx="3" class="st0"/>
+            <rect x="270" y="115" width="40" height="15" class="st0"/>
+
+            <!-- POSTERIOR -->
+            <text x="460" y="25" class="text">POSTERIOR</text>
+            <path class="st0" d="M 430 135 L 435 95 Q 440 75 470 70 L 510 70 Q 540 75 545 95 L 550 135 Z"/>
+            <rect x="440" y="100" width="30" height="10" rx="2" class="st1"/>
+            <rect x="510" y="100" width="30" height="10" rx="2" class="st1"/>
+            <rect x="470" y="115" width="40" height="12" class="st0"/>
+
+            <!-- LADO IZQUIERDO -->
+            <text x="640" y="25" class="text">LADO IZQUIERDO</text>
+            <path class="st0" d="M 600 110 Q 610 75 650 70 L 690 70 Q 720 70 740 110 L 760 115 Q 765 130 760 140 L 600 140 Z"/>
+            <circle class="st1" cx="630" cy="140" r="14"/><circle class="st1" cx="730" cy="140" r="14"/>
+            <path class="st0" d="M 650 75 L 685 75 L 685 105 L 635 105 Z M 690 75 L 730 75 L 730 105 L 690 105 Z"/>
+        </svg>`;
+
+        let bgImage = new Image();
 
         function initCanvas() {
             canvas = document.getElementById('carCanvas');
             if (!canvas) return;
             ctx = canvas.getContext('2d');
-            drawCarOutline();
+
+            bgImage.src = 'data:image/svg+xml;base64,' + btoa(carSVG);
+            bgImage.onload = () => drawCarOutline();
 
             canvas.addEventListener('mousedown', startDrawing);
             canvas.addEventListener('mousemove', draw);
@@ -490,7 +436,7 @@
                 const rect = canvas.getBoundingClientRect();
                 isDrawing = true;
                 ctx.beginPath();
-                ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+                ctx.moveTo((touch.clientX - rect.left) * (canvas.width / rect.width), (touch.clientY - rect.top) * (canvas.height / rect.height));
             });
 
             canvas.addEventListener('touchmove', (e) => {
@@ -501,7 +447,7 @@
                 ctx.strokeStyle = '#ef4444';
                 ctx.lineWidth = 3;
                 ctx.lineCap = 'round';
-                ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+                ctx.lineTo((touch.clientX - rect.left) * (canvas.width / rect.width), (touch.clientY - rect.top) * (canvas.height / rect.height));
                 ctx.stroke();
             });
 
@@ -510,59 +456,16 @@
 
         function drawCarOutline() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#ffffff";
+            ctx.fillStyle = "#0f172a";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.strokeStyle = '#94a3b8';
-            ctx.lineWidth = 1.5;
-            
-            ctx.fillStyle = "#64748b";
-            ctx.font = "11px Inter, sans-serif";
-            ctx.fillText("LADO DERECHO", 50, 20);
-            ctx.fillText("FRENTE", 250, 20);
-            ctx.fillText("DETRÁS", 430, 20);
-            ctx.fillText("LADO IZQUIERDO", 590, 20);
-
-            drawCarSide(20, 50);
-            drawCarFront(220, 50);
-            drawCarRear(400, 50);
-            drawCarSide(560, 50);
-        }
-
-        function drawCarSide(x, y) {
-            ctx.save();
-            ctx.beginPath();
-            ctx.rect(x, y + 30, 140, 45);
-            ctx.rect(x + 30, y + 5, 80, 25);
-            ctx.arc(x + 35, y + 75, 12, 0, Math.PI * 2);
-            ctx.arc(x + 105, y + 75, 12, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.restore();
-        }
-
-        function drawCarFront(x, y) {
-            ctx.save();
-            ctx.beginPath();
-            ctx.rect(x + 10, y + 15, 100, 60);
-            ctx.rect(x + 20, y + 25, 80, 25);
-            ctx.stroke();
-            ctx.restore();
-        }
-
-        function drawCarRear(x, y) {
-            ctx.save();
-            ctx.beginPath();
-            ctx.rect(x + 10, y + 15, 100, 60);
-            ctx.rect(x + 20, y + 25, 80, 25);
-            ctx.stroke();
-            ctx.restore();
+            ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
         }
 
         function startDrawing(e) {
             isDrawing = true;
             const rect = canvas.getBoundingClientRect();
             ctx.beginPath();
-            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+            ctx.moveTo((e.clientX - rect.left) * (canvas.width / rect.width), (e.clientY - rect.top) * (canvas.height / rect.height));
         }
 
         function draw(e) {
@@ -571,7 +474,7 @@
             ctx.strokeStyle = '#ef4444';
             ctx.lineWidth = 3;
             ctx.lineCap = 'round';
-            ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+            ctx.lineTo((e.clientX - rect.left) * (canvas.width / rect.width), (e.clientY - rect.top) * (canvas.height / rect.height));
             ctx.stroke();
         }
 
@@ -589,7 +492,38 @@
             document.getElementById('resumenTotal').innerText = '$' + calcularTotal();
         }
 
+        function guardarEnGoogleSheets() {
+            if (!GOOGLE_SHEETS_WEBHOOK_URL || GOOGLE_SHEETS_WEBHOOK_URL.includes("TU_SCRIPT_ID_AQUI")) return;
+
+            const tipo = document.getElementById('tipoVehiculo').value;
+            const listaServicios = [];
+            selectedServices.forEach(id => {
+                const s = serviciosData.find(item => item.id === id);
+                if (s) listaServicios.push(s.nombre);
+            });
+
+            const payload = {
+                folio: document.getElementById('folioDisplay').innerText.replace('Folio: ', ''),
+                nombre: document.getElementById('nombreCliente').value || 'Sin Nombre',
+                telefono: document.getElementById('telefonoCliente').value || 'Sin Teléfono',
+                email: document.getElementById('emailCliente').value || 'Sin Email',
+                vehiculo: `${document.getElementById('marcaVehiculo').value} ${document.getElementById('modeloVehiculo').value}`,
+                placa: document.getElementById('placasVehiculo').value || 'Sin Placa',
+                total: '$' + calcularTotal(),
+                servicios: listaServicios.join(', ')
+            };
+
+            fetch(GOOGLE_SHEETS_WEBHOOK_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).catch(err => console.error("Error al sincronizar con Google Sheets:", err));
+        }
+
         function enviarWhatsApp() {
+            guardarEnGoogleSheets();
+
             const cliente = document.getElementById('nombreCliente').value || 'Estimado(a) cliente';
             const telefono = document.getElementById('telefonoCliente').value.replace(/\D/g, '');
             const marca = document.getElementById('marcaVehiculo').value || 'Vehículo';
@@ -597,16 +531,14 @@
             const tipo = document.getElementById('tipoVehiculo').value;
             const total = calcularTotal();
 
-            let msj = `*K-SHIELD DETAILING* 🚗✨\n`;
+            let msj = `*Kmotorstudio Detailing* 🚗✨\n`;
             msj += `*Cotización y Recepción Vehicular*\n\n`;
             msj += `Hola *${cliente}*, adjuntamos la cotización de servicios para su *${marca} ${modelo}*:\n\n`;
             msj += `*Servicios Seleccionados:*\n`;
 
             selectedServices.forEach(id => {
                 const s = serviciosData.find(item => item.id === id);
-                if (s) {
-                    msj += `• ${s.nombre}: *$${s.precios[tipo].toFixed(2)}*\n`;
-                }
+                if (s) msj += `• ${s.nombre}: *$${s.precios[tipo].toFixed(2)}*\n`;
             });
 
             msj += `\n*TOTAL ESTIMADO:* *$${total} USD*\n\n`;
