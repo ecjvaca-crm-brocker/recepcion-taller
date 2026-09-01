@@ -1,5 +1,4 @@
-# Re-generating and writing index.html to ensure it is created properly in the workspace
-html_content = """<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -586,25 +585,25 @@ html_content = """<!DOCTYPE html>
 
         function enviarWhatsApp() {
             const cliente = document.getElementById('nombreCliente').value || 'Estimado(a) cliente';
-            const telefono = document.getElementById('telefonoCliente').value.replace(/\\D/g, '');
+            const telefono = document.getElementById('telefonoCliente').value.replace(/\D/g, '');
             const marca = document.getElementById('marcaVehiculo').value || 'Vehículo';
             const modelo = document.getElementById('modeloVehiculo').value || '';
             const tipo = document.getElementById('tipoVehiculo').value;
             const total = calcularTotal();
 
-            let msj = `*K-SHIELD DETAILING* 🚗✨\\n`;
-            msj += `*Cotización y Recepción Vehicular*\\n\\n`;
-            msj += `Hola *${cliente}*, adjuntamos la cotización de servicios para su *${marca} ${modelo}*:\\n\\n`;
-            msj += `*Servicios Seleccionados:*\\n`;
+            let msj = `*K-SHIELD DETAILING* 🚗✨\n`;
+            msj += `*Cotización y Recepción Vehicular*\n\n`;
+            msj += `Hola *${cliente}*, adjuntamos la cotización de servicios para su *${marca} ${modelo}*:\n\n`;
+            msj += `*Servicios Seleccionados:*\n`;
 
             selectedServices.forEach(id => {
                 const s = serviciosData.find(item => item.id === id);
                 if (s) {
-                    msj += `• ${s.nombre}: *$${s.precios[tipo].toFixed(2)}*\\n`;
+                    msj += `• ${s.nombre}: *$${s.precios[tipo].toFixed(2)}*\n`;
                 }
             });
 
-            msj += `\\n*TOTAL ESTIMADO:* *$${total} USD*\\n\\n`;
+            msj += `\n*TOTAL ESTIMADO:* *$${total} USD*\n\n`;
             msj += `📌 _Tiempos sujetos al tratamiento elegido. Quedamos a su disposición para confirmar su cita._`;
 
             const encoded = encodeURIComponent(msj);
@@ -614,9 +613,3 @@ html_content = """<!DOCTYPE html>
     </script>
 </body>
 </html>
-"""
-
-with open("index.html", "w", encoding="utf-8") as f:
-    f.write(html_content)
-
-print("File index.html re-written successfully.")
