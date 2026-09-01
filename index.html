@@ -258,9 +258,9 @@
 
     </main>
 
-<script>
+    <script>
         // PEGA AQUÍ LA URL DE TU GOOGLE APPS SCRIPT
-        const GOOGLE_SHEETS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxH4VDx8zR8d-LNpnwbHwWODkQQUNFk_76RLGyk9kDDixBPaxLm_YeLeohoHkpsUh7R/exec";
+        const GOOGLE_SHEETS_WEBHOOK_URL = "AKfycbxH4VDx8zR8d-LNpnwbHwWODkQQUNFk_76RLGyk9kDDixBPaxLm_YeLeohoHkpsUh7R";
 
         const serviciosData = [
             { id: 'abrillantado', nombre: 'ABRILLANTADO', detalle: 'Tratamiento para recuperar brillo y eliminar opacidad superficial.', precios: { sedan: 31.25, suv: 50.00, camioneta: 62.50 }, tiempo: { sedan: '2-3 HRS', suv: '3-5 HRS', camioneta: '5-6 HRS' } },
@@ -492,19 +492,10 @@
             document.getElementById('resumenTotal').innerText = '$' + calcularTotal();
         }
 
-        async function enviarWhatsApp(e) {
-            const btn = e ? e.currentTarget : event.target;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = `<span>⏳ Generando Registro y PDF...</span>`;
-            btn.disabled = true;
+        function guardarEnGoogleSheets() {
+            if (!GOOGLE_SHEETS_WEBHOOK_URL || GOOGLE_SHEETS_WEBHOOK_URL.includes("TU_SCRIPT_ID_AQUI")) return;
 
-            const cliente = document.getElementById('nombreCliente').value || 'Estimado(a) cliente';
-            const telefono = document.getElementById('telefonoCliente').value.replace(/\D/g, '');
-            const marca = document.getElementById('marcaVehiculo').value || 'Vehículo';
-            const modelo = document.getElementById('modeloVehiculo').value || '';
             const tipo = document.getElementById('tipoVehiculo').value;
-            const total = calcularTotal();
-
             const listaServicios = [];
             selectedServices.forEach(id => {
                 const s = serviciosData.find(item => item.id === id);
@@ -516,30 +507,29 @@
                 nombre: document.getElementById('nombreCliente').value || 'Sin Nombre',
                 telefono: document.getElementById('telefonoCliente').value || 'Sin Teléfono',
                 email: document.getElementById('emailCliente').value || 'Sin Email',
-                vehiculo: `${marca} ${modelo}`,
+                vehiculo: `${document.getElementById('marcaVehiculo').value} ${document.getElementById('modeloVehiculo').value}`,
                 placa: document.getElementById('placasVehiculo').value || 'Sin Placa',
-                total: '$' + total,
+                total: '$' + calcularTotal(),
                 servicios: listaServicios.join(', ')
             };
 
-            let pdfUrl = "";
+            fetch(GOOGLE_SHEETS_WEBHOOK_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).catch(err => console.error("Error al sincronizar con Google Sheets:", err));
+        }
 
-            try {
-                if (GOOGLE_SHEETS_WEBHOOK_URL && !GOOGLE_SHEETS_WEBHOOK_URL.includes("TU_SCRIPT_ID_AQUI")) {
-                    const response = await fetch(GOOGLE_SHEETS_WEBHOOK_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify(payload)
-                    });
-                    
-                    const resData = await response.json();
-                    if (resData && resData.pdfUrl) {
-                        pdfUrl = resData.pdfUrl;
-                    }
-                }
-            } catch (err) {
-                console.error("Error al registrar en Google Sheets / PDF:", err);
-            }
+        function enviarWhatsApp() {
+            guardarEnGoogleSheets();
+
+            const cliente = document.getElementById('nombreCliente').value || 'Estimado(a) cliente';
+            const telefono = document.getElementById('telefonoCliente').value.replace(/\D/g, '');
+            const marca = document.getElementById('marcaVehiculo').value || 'Vehículo';
+            const modelo = document.getElementById('modeloVehiculo').value || '';
+            const tipo = document.getElementById('tipoVehiculo').value;
+            const total = calcularTotal();
 
             let msj = `*Kmotorstudio Detailing* 🚗✨\n`;
             msj += `*Cotización y Recepción Vehicular*\n\n`;
@@ -552,19 +542,12 @@
             });
 
             msj += `\n*TOTAL ESTIMADO:* *$${total} USD*\n\n`;
-            
-            if (pdfUrl) {
-                msj += `📄 *Descarga tu comprobante en PDF aquí:*\n${pdfUrl}\n\n`;
-            }
-
             msj += `📌 _Tiempos sujetos al tratamiento elegido. Quedamos a su disposición para confirmar su cita._`;
 
             const encoded = encodeURIComponent(msj);
             const num = telefono.startsWith('593') ? telefono : '593' + telefono.replace(/^0/, '');
-            
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-
             window.open(`https://wa.me/${num}?text=${encoded}`, '_blank');
         }
     </script>
+</body>
+</html>
