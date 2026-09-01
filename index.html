@@ -346,7 +346,9 @@
         let selectedTestigos = new Set();
 
         window.onload = function() {
-            lucide.createIcons();
+            if (window.lucide) {
+                lucide.createIcons();
+            }
             renderInventario();
             renderTestigos();
             renderServicios();
@@ -372,6 +374,10 @@
 
             if (tabId === 'tab-resumen') {
                 actualizarResumen();
+            }
+            
+            if (window.lucide) {
+                lucide.createIcons();
             }
         }
 
@@ -438,7 +444,10 @@
                     </div>
                 `;
             }).join('');
-            lucide.createIcons();
+            
+            if (window.lucide) {
+                lucide.createIcons();
+            }
             calcularTotal();
         }
 
@@ -467,6 +476,7 @@
 
         function initCanvas() {
             canvas = document.getElementById('carCanvas');
+            if (!canvas) return;
             ctx = canvas.getContext('2d');
             drawCarOutline();
 
@@ -513,13 +523,9 @@
             ctx.fillText("DETRÁS", 430, 20);
             ctx.fillText("LADO IZQUIERDO", 590, 20);
 
-            // Car Side Right
             drawCarSide(20, 50);
-            // Car Front
             drawCarFront(220, 50);
-            // Car Rear
             drawCarRear(400, 50);
-            // Car Side Left
             drawCarSide(560, 50);
         }
 
