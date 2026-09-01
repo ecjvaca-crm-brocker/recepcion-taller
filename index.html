@@ -521,10 +521,10 @@
             }).catch(err => console.error("Error al sincronizar con Google Sheets:", err));
         }
 
-        async function enviarWhatsApp() {
+async function enviarWhatsApp() {
     const btn = event.currentTarget;
     const originalText = btn.innerHTML;
-    btn.innerHTML = `<span>Generando PDF...</span>`;
+    btn.innerHTML = `<span>⏳ Generando Registro y PDF...</span>`;
     btn.disabled = true;
 
     const cliente = document.getElementById('nombreCliente').value || 'Estimado(a) cliente';
@@ -545,7 +545,7 @@
         nombre: document.getElementById('nombreCliente').value || 'Sin Nombre',
         telefono: document.getElementById('telefonoCliente').value || 'Sin Teléfono',
         email: document.getElementById('emailCliente').value || 'Sin Email',
-        vehiculo: `${document.getElementById('marcaVehiculo').value} ${document.getElementById('modeloVehiculo').value}`,
+        vehiculo: `${marca} ${modelo}`,
         placa: document.getElementById('placasVehiculo').value || 'Sin Placa',
         total: '$' + total,
         servicios: listaServicios.join(', ')
@@ -555,19 +555,23 @@
 
     try {
         if (GOOGLE_SHEETS_WEBHOOK_URL && !GOOGLE_SHEETS_WEBHOOK_URL.includes("TU_SCRIPT_ID_AQUI")) {
+            // Se envía text/plain para omitir bloqueos pre-flight de CORS en Google Script
             const response = await fetch(GOOGLE_SHEETS_WEBHOOK_URL, {
                 method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(payload)
             });
+            
             const resData = await response.json();
-            if (resData.pdfUrl) {
+            if (resData && resData.pdfUrl) {
                 pdfUrl = resData.pdfUrl;
             }
         }
     } catch (err) {
-        console.error("Error al generar PDF:", err);
+        console.error("Error al registrar en Google Sheets / PDF:", err);
     }
 
+    // Construcción del mensaje de WhatsApp
     let msj = `*Kmotorstudio Detailing* 🚗✨\n`;
     msj += `*Cotización y Recepción Vehicular*\n\n`;
     msj += `Hola *${cliente}*, adjuntamos la cotización de servicios para su *${marca} ${modelo}*:\n\n`;
@@ -581,7 +585,7 @@
     msj += `\n*TOTAL ESTIMADO:* *$${total} USD*\n\n`;
     
     if (pdfUrl) {
-        msj += `📄 *Descarga tu comprobante PDF aquí:*\n${pdfUrl}\n\n`;
+        msj += `📄 *Descarga tu comprobante en PDF aquí:*\n${pdfUrl}\n\n`;
     }
 
     msj += `📌 _Tiempos sujetos al tratamiento elegido. Quedamos a su disposición para confirmar su cita._`;
@@ -593,6 +597,7 @@
     btn.disabled = false;
 
     window.open(`https://wa.me/${num}?text=${encoded}`, '_blank');
+}
 }
         }
     </script>
