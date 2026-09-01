@@ -521,32 +521,79 @@
             }).catch(err => console.error("Error al sincronizar con Google Sheets:", err));
         }
 
-        function enviarWhatsApp() {
-            guardarEnGoogleSheets();
+        async function enviarWhatsApp() {
+    const btn = event.currentTarget;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = `<span>Generando PDF...</span>`;
+    btn.disabled = true;
 
-            const cliente = document.getElementById('nombreCliente').value || 'Estimado(a) cliente';
-            const telefono = document.getElementById('telefonoCliente').value.replace(/\D/g, '');
-            const marca = document.getElementById('marcaVehiculo').value || 'Vehículo';
-            const modelo = document.getElementById('modeloVehiculo').value || '';
-            const tipo = document.getElementById('tipoVehiculo').value;
-            const total = calcularTotal();
+    const cliente = document.getElementById('nombreCliente').value || 'Estimado(a) cliente';
+    const telefono = document.getElementById('telefonoCliente').value.replace(/\D/g, '');
+    const marca = document.getElementById('marcaVehiculo').value || 'Vehículo';
+    const modelo = document.getElementById('modeloVehiculo').value || '';
+    const tipo = document.getElementById('tipoVehiculo').value;
+    const total = calcularTotal();
 
-            let msj = `*Kmotorstudio Detailing* 🚗✨\n`;
-            msj += `*Cotización y Recepción Vehicular*\n\n`;
-            msj += `Hola *${cliente}*, adjuntamos la cotización de servicios para su *${marca} ${modelo}*:\n\n`;
-            msj += `*Servicios Seleccionados:*\n`;
+    const listaServicios = [];
+    selectedServices.forEach(id => {
+        const s = serviciosData.find(item => item.id === id);
+        if (s) listaServicios.push(s.nombre);
+    });
 
-            selectedServices.forEach(id => {
-                const s = serviciosData.find(item => item.id === id);
-                if (s) msj += `• ${s.nombre}: *$${s.precios[tipo].toFixed(2)}*\n`;
+    const payload = {
+        folio: document.getElementById('folioDisplay').innerText.replace('Folio: ', ''),
+        nombre: document.getElementById('nombreCliente').value || 'Sin Nombre',
+        telefono: document.getElementById('telefonoCliente').value || 'Sin Teléfono',
+        email: document.getElementById('emailCliente').value || 'Sin Email',
+        vehiculo: `${document.getElementById('marcaVehiculo').value} ${document.getElementById('modeloVehiculo').value}`,
+        placa: document.getElementById('placasVehiculo').value || 'Sin Placa',
+        total: '$' + total,
+        servicios: listaServicios.join(', ')
+    };
+
+    let pdfUrl = "";
+
+    try {
+        if (GOOGLE_SHEETS_WEBHOOK_URL && !GOOGLE_SHEETS_WEBHOOK_URL.includes("TU_SCRIPT_ID_AQUI")) {
+            const response = await fetch(GOOGLE_SHEETS_WEBHOOK_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload)
             });
+            const resData = await response.json();
+            if (resData.pdfUrl) {
+                pdfUrl = resData.pdfUrl;
+            }
+        }
+    } catch (err) {
+        console.error("Error al generar PDF:", err);
+    }
 
-            msj += `\n*TOTAL ESTIMADO:* *$${total} USD*\n\n`;
-            msj += `📌 _Tiempos sujetos al tratamiento elegido. Quedamos a su disposición para confirmar su cita._`;
+    let msj = `*Kmotorstudio Detailing* 🚗✨\n`;
+    msj += `*Cotización y Recepción Vehicular*\n\n`;
+    msj += `Hola *${cliente}*, adjuntamos la cotización de servicios para su *${marca} ${modelo}*:\n\n`;
+    msj += `*Servicios Seleccionados:*\n`;
 
-            const encoded = encodeURIComponent(msj);
-            const num = telefono.startsWith('593') ? telefono : '593' + telefono.replace(/^0/, '');
-            window.open(`https://wa.me/${num}?text=${encoded}`, '_blank');
+    selectedServices.forEach(id => {
+        const s = serviciosData.find(item => item.id === id);
+        if (s) msj += `• ${s.nombre}: *$${s.precios[tipo].toFixed(2)}*\n`;
+    });
+
+    msj += `\n*TOTAL ESTIMADO:* *$${total} USD*\n\n`;
+    
+    if (pdfUrl) {
+        msj += `📄 *Descarga tu comprobante PDF aquí:*\n${pdfUrl}\n\n`;
+    }
+
+    msj += `📌 _Tiempos sujetos al tratamiento elegido. Quedamos a su disposición para confirmar su cita._`;
+
+    const encoded = encodeURIComponent(msj);
+    const num = telefono.startsWith('593') ? telefono : '593' + telefono.replace(/^0/, '');
+    
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+
+    window.open(`https://wa.me/${num}?text=${encoded}`, '_blank');
+}
         }
     </script>
 </body>
