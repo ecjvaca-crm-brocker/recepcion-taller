@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+# Re-generating and writing index.html to ensure it is created properly in the workspace
+html_content = """<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -129,14 +130,18 @@
 
         <!-- TAB 2: INSPECCION & INVENTARIO -->
         <section id="tab-inspeccion" class="tab-content hidden space-y-4">
+            <!-- Inventario de Accesorios -->
             <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
                 <h2 class="text-base font-bold text-slate-800 mb-3 flex items-center space-x-2 border-b pb-2">
                     <i data-lucide="check-square" class="w-5 h-5 text-sky-600"></i>
                     <span>Inventario de Accesorios</span>
                 </h2>
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3" id="inventarioContainer"></div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3" id="inventarioContainer">
+                    <!-- Checks renderizados via JS -->
+                </div>
             </div>
 
+            <!-- Nivel de Combustible & Testigos -->
             <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -154,11 +159,14 @@
                             <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-500"></i>
                             <span>Testigos Encendidos en Tablero</span>
                         </h3>
-                        <div class="flex flex-wrap gap-2" id="testigosContainer"></div>
+                        <div class="flex flex-wrap gap-2" id="testigosContainer">
+                            <!-- Iconos testigos via JS -->
+                        </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Inspección de Daños Preexistentes -->
             <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
                 <div class="flex justify-between items-center mb-3">
                     <h2 class="text-base font-bold text-slate-800 flex items-center space-x-2">
@@ -197,14 +205,18 @@
                     <span id="tipoVehiculoBadge" class="text-xs font-bold uppercase bg-sky-100 text-sky-800 px-3 py-1 rounded-full">Sedán / HB</span>
                 </div>
                 
-                <div id="serviciosGrid" class="space-y-3"></div>
+                <div id="serviciosGrid" class="space-y-3">
+                    <!-- Lista de servicios renderizados por JS -->
+                </div>
 
+                <!-- Observaciones Adicionales -->
                 <div class="mt-5 pt-4 border-t border-slate-200">
                     <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Trabajos / Observaciones Especiales Adicionales</label>
                     <textarea id="observacionesTrabajo" rows="3" placeholder="Ej. Pulido de cristales, limpieza profunda de tapicería, detalle de motor..." class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-sky-500 outline-none"></textarea>
                 </div>
             </div>
 
+            <!-- Resumen Totales -->
             <div class="bg-slate-900 text-white rounded-xl p-5 shadow-lg flex justify-between items-center">
                 <div>
                     <span class="text-xs text-slate-400 block uppercase font-semibold">Total Estimado Cotizado</span>
@@ -256,19 +268,80 @@
     </main>
 
     <script>
+        // Catalogo de Servicios y Precios Oficiales de K-Shield
         const serviciosData = [
-            { id: 'abrillantado', nombre: 'ABRILLANTADO', detalle: 'Tratamiento diseñado para recuperar el brillo perdido.', precios: { sedan: 31.25, suv: 50.00, camioneta: 62.50 }, tiempo: { sedan: '2-3 HRS', suv: '3-5 HRS', camioneta: '5-6 HRS' } },
-            { id: 'pulido', nombre: 'PULIDO DE PINTURA', detalle: 'Corrección de pintura que elimina defectos graves (swirls, rayas).', precios: { sedan: 56.25, suv: 75.00, camioneta: 93.75 }, tiempo: { sedan: '6-8 HRS', suv: '8-12 HRS', camioneta: '12-16 HRS' } },
-            { id: 'faros', nombre: 'RESTAURACIÓN DE FAROS (Par)', detalle: 'Proceso técnico para recuperar la transparencia con protección UV.', precios: { sedan: 18.75, suv: 25.00, camioneta: 31.25 }, tiempo: { sedan: '1-2 HRS', suv: '1-2 HRS', camioneta: '1-2 HRS' } },
-            { id: 'sellador_nano', nombre: 'SELLADOR BIO-NANO (Protección 6 Meses)', detalle: 'Aplicación de sellador sintético bionanotecnológico.', precios: { sedan: 144.30, suv: 163.33, camioneta: 197.11 }, tiempo: { sedan: '6 HORAS', suv: '8 HORAS', camioneta: '12 HORAS' } },
-            { id: 'coating_1ano', nombre: 'COATING NANO-GRAFENO BX (Protección 1 Año)', detalle: 'Protección con nanotecnología de grafeno.', precios: { sedan: 244.86, suv: 294.86, camioneta: 344.86 }, tiempo: { sedan: '6 HORAS', suv: '8 HORAS', camioneta: '12 HORAS' } },
-            { id: 'coating_2anos', nombre: 'COATING CERÁMICO AYICON V4 (Protección 2 Años)', detalle: 'Capa dura y cristalina con efecto espejo y autolimpieza.', precios: { sedan: 318.16, suv: 374.59, camioneta: 422.26 }, tiempo: { sedan: '12 HORAS', suv: '12 HORAS', camioneta: '12 HORAS' } },
-            { id: 'coating_3anos', nombre: 'COATING CERÁMICO HYBRID GRAPHENE (Protección 3 Años)', detalle: 'Tratamiento avanzado que combina la dureza cerámica con flexibilidad.', precios: { sedan: 387.39, suv: 445.08, camioneta: 491.50 }, tiempo: { sedan: '14 HORAS', suv: '14 HORAS', camioneta: '14 HORAS' } },
-            { id: 'coating_7anos', nombre: 'COATING CERÁMICO NANO GRAPHENE+ (Protección 7 Años)', detalle: 'Recubrimiento de grafeno de grado profesional.', precios: { sedan: 505.76, suv: 563.44, camioneta: 609.86 }, tiempo: { sedan: '24 HORAS', suv: '24 HORAS', camioneta: '24 HORAS' } }
+            {
+                id: 'abrillantado',
+                nombre: 'ABRILLANTADO',
+                detalle: 'Tratamiento diseñado para recuperar el brillo perdido. Elimina opacidad superficial y resalta la profundidad del color.',
+                precios: { sedan: 31.25, suv: 50.00, camioneta: 62.50 },
+                tiempo: { sedan: '2-3 HRS', suv: '3-5 HRS', camioneta: '5-6 HRS' }
+            },
+            {
+                id: 'pulido',
+                nombre: 'PULIDO DE PINTURA',
+                detalle: 'Corrección de pintura que elimina defectos graves (swirls, rayas, manchas de agua). Corte + refinado.',
+                precios: { sedan: 56.25, suv: 75.00, camioneta: 93.75 },
+                tiempo: { sedan: '6-8 HRS', suv: '8-12 HRS', camioneta: '12-16 HRS' }
+            },
+            {
+                id: 'faros',
+                nombre: 'RESTAURACIÓN DE FAROS (Par)',
+                detalle: 'Proceso técnico para recuperar la transparencia de ópticas deslucidas/amarillentas con protección UV.',
+                precios: { sedan: 18.75, suv: 25.00, camioneta: 31.25 },
+                tiempo: { sedan: '1-2 HRS', suv: '1-2 HRS', camioneta: '1-2 HRS' }
+            },
+            {
+                id: 'sellador_nano',
+                nombre: 'SELLADOR BIO-NANO (Protección 6 Meses)',
+                detalle: 'Aplicación de sellador sintético bionanotecnológico con alta hidrofobia y suavidad al tacto.',
+                precios: { sedan: 144.30, suv: 163.33, camioneta: 197.11 },
+                tiempo: { sedan: '6 HORAS', suv: '8 HORAS', camioneta: '12 HORAS' }
+            },
+            {
+                id: 'coating_1ano',
+                nombre: 'COATING NANO-GRAFENO BX (Protección 1 Año)',
+                detalle: 'Protección con nanotecnología de grafeno. Excelente resistencia al calor y repelencia a la suciedad.',
+                precios: { sedan: 244.86, suv: 294.86, camioneta: 344.86 },
+                tiempo: { sedan: '6 HORAS', suv: '8 HORAS', camioneta: '12 HORAS' }
+            },
+            {
+                id: 'coating_2anos',
+                nombre: 'COATING CERÁMICO AYICON V4 (Protección 2 Años)',
+                detalle: 'Capa dura y cristalina con efecto espejo y autolimpieza. Protección contra micro-rayas y excrementos.',
+                precios: { sedan: 318.16, suv: 374.59, camioneta: 422.26 },
+                tiempo: { sedan: '12 HORAS', suv: '12 HORAS', camioneta: '12 HORAS' }
+            },
+            {
+                id: 'coating_3anos',
+                nombre: 'COATING CERÁMICO HYBRID GRAPHENE (Protección 3 Años)',
+                detalle: 'Tratamiento avanzado que combina la dureza cerámica con flexibilidad y disipación térmica (pH 2 a 12).',
+                precios: { sedan: 387.39, suv: 445.08, camioneta: 491.50 },
+                tiempo: { sedan: '14 HORAS', suv: '14 HORAS', camioneta: '14 HORAS' }
+            },
+            {
+                id: 'coating_7anos',
+                nombre: 'COATING CERÁMICO NANO GRAPHENE+ (Protección 7 Años)',
+                detalle: 'Recubrimiento de grafeno de grado profesional. Máxima dureza estructural y protección extrema.',
+                precios: { sedan: 505.76, suv: 563.44, camioneta: 609.86 },
+                tiempo: { sedan: '24 HORAS', suv: '24 HORAS', camioneta: '24 HORAS' }
+            }
         ];
 
-        const inventarioItems = ["Gato Hidráulico", "Herramientas", "Triángulos", "Tapetes", "Llanta Refacción", "Extintor", "Antena", "Emblemas", "Tapones Rueda", "Cables", "Estéreo", "Encendedor"];
-        const testigosList = [{ id: 'abs', label: 'ABS' }, { id: 'engine', label: 'Motor' }, { id: 'oil', label: 'Aceite' }, { id: 'battery', label: 'Batería' }, { id: 'brake', label: 'Freno' }, { id: 'temp', label: 'Temp' }];
+        const inventarioItems = [
+            "Gato Hidráulico", "Herramientas", "Triángulos", "Tapetes",
+            "Llanta Refacción", "Extintor", "Antena", "Emblemas",
+            "Tapones Rueda", "Cables", "Estéreo", "Encendedor"
+        ];
+
+        const testigosList = [
+            { id: 'abs', label: 'ABS' },
+            { id: 'engine', label: 'Motor' },
+            { id: 'oil', label: 'Aceite' },
+            { id: 'battery', label: 'Batería' },
+            { id: 'brake', label: 'Freno' },
+            { id: 'temp', label: 'Temp' }
+        ];
 
         let selectedServices = new Set();
         let selectedTestigos = new Set();
@@ -279,6 +352,7 @@
             renderTestigos();
             renderServicios();
             initCanvas();
+            
             document.getElementById('fuelGauge').addEventListener('input', (e) => {
                 document.getElementById('fuelValue').innerText = e.target.value + '%';
             });
@@ -287,16 +361,24 @@
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.getElementById(tabId).classList.remove('hidden');
+            
             ['cliente', 'inspeccion', 'servicios', 'resumen'].forEach(name => {
                 const btn = document.getElementById('btn-tab-' + name);
-                if ('tab-' + name === tabId) btn.classList.add('tab-active');
-                else btn.classList.remove('tab-active');
+                if ('tab-' + name === tabId) {
+                    btn.classList.add('tab-active');
+                } else {
+                    btn.classList.remove('tab-active');
+                }
             });
-            if (tabId === 'tab-resumen') actualizarResumen();
+
+            if (tabId === 'tab-resumen') {
+                actualizarResumen();
+            }
         }
 
         function renderInventario() {
-            document.getElementById('inventarioContainer').innerHTML = inventarioItems.map((item, idx) => `
+            const container = document.getElementById('inventarioContainer');
+            container.innerHTML = inventarioItems.map((item, idx) => `
                 <label class="flex items-center space-x-2 bg-slate-50 border border-slate-200 p-2.5 rounded-lg cursor-pointer hover:bg-sky-50 transition">
                     <input type="checkbox" id="inv_${idx}" class="w-4 h-4 accent-sky-600 rounded">
                     <span class="text-xs font-medium text-slate-700">${item}</span>
@@ -305,7 +387,8 @@
         }
 
         function renderTestigos() {
-            document.getElementById('testigosContainer').innerHTML = testigosList.map(t => `
+            const container = document.getElementById('testigosContainer');
+            container.innerHTML = testigosList.map(t => `
                 <button type="button" onclick="toggleTestigo('${t.id}')" id="testigo_${t.id}" class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-300 text-slate-600 hover:bg-slate-100 flex items-center space-x-1">
                     <span>${t.label}</span>
                 </button>
@@ -328,7 +411,8 @@
             const labels = { sedan: 'Sedán / Hatchback', suv: 'SUV / Medianos', camioneta: 'Camionetas / Grandes' };
             document.getElementById('tipoVehiculoBadge').innerText = labels[tipo];
 
-            document.getElementById('serviciosGrid').innerHTML = serviciosData.map(s => {
+            const grid = document.getElementById('serviciosGrid');
+            grid.innerHTML = serviciosData.map(s => {
                 const precio = s.precios[tipo].toFixed(2);
                 const tiempo = s.tiempo[tipo];
                 const isSelected = selectedServices.has(s.id);
@@ -360,8 +444,11 @@
         }
 
         function toggleServicio(id) {
-            if (selectedServices.has(id)) selectedServices.delete(id);
-            else selectedServices.add(id);
+            if (selectedServices.has(id)) {
+                selectedServices.delete(id);
+            } else {
+                selectedServices.add(id);
+            }
             renderServicios();
         }
 
@@ -376,6 +463,7 @@
             return total.toFixed(2);
         }
 
+        // Canvas Diagrama Carroceria
         let canvas, ctx, isDrawing = false;
 
         function initCanvas() {
@@ -415,8 +503,10 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+
             ctx.strokeStyle = '#94a3b8';
             ctx.lineWidth = 1.5;
+            
             ctx.fillStyle = "#64748b";
             ctx.font = "11px Inter, sans-serif";
             ctx.fillText("LADO DERECHO", 50, 20);
@@ -424,9 +514,13 @@
             ctx.fillText("DETRÁS", 430, 20);
             ctx.fillText("LADO IZQUIERDO", 590, 20);
 
+            // Car Side Right
             drawCarSide(20, 50);
+            // Car Front
             drawCarFront(220, 50);
+            // Car Rear
             drawCarRear(400, 50);
+            // Car Side Left
             drawCarSide(560, 50);
         }
 
@@ -492,25 +586,25 @@
 
         function enviarWhatsApp() {
             const cliente = document.getElementById('nombreCliente').value || 'Estimado(a) cliente';
-            const telefono = document.getElementById('telefonoCliente').value.replace(/\D/g, '');
+            const telefono = document.getElementById('telefonoCliente').value.replace(/\\D/g, '');
             const marca = document.getElementById('marcaVehiculo').value || 'Vehículo';
             const modelo = document.getElementById('modeloVehiculo').value || '';
             const tipo = document.getElementById('tipoVehiculo').value;
             const total = calcularTotal();
 
-            let msj = `*K-SHIELD DETAILING* 🚗✨\n`;
-            msj += `*Cotización y Recepción Vehicular*\n\n`;
-            msj += `Hola *${cliente}*, adjuntamos la cotización de servicios para su *${marca} ${modelo}*:\n\n`;
-            msj += `*Servicios Seleccionados:*\n`;
+            let msj = `*K-SHIELD DETAILING* 🚗✨\\n`;
+            msj += `*Cotización y Recepción Vehicular*\\n\\n`;
+            msj += `Hola *${cliente}*, adjuntamos la cotización de servicios para su *${marca} ${modelo}*:\\n\\n`;
+            msj += `*Servicios Seleccionados:*\\n`;
 
             selectedServices.forEach(id => {
                 const s = serviciosData.find(item => item.id === id);
                 if (s) {
-                    msj += `• ${s.nombre}: *$${s.precios[tipo].toFixed(2)}*\n`;
+                    msj += `• ${s.nombre}: *$${s.precios[tipo].toFixed(2)}*\\n`;
                 }
             });
 
-            msj += `\n*TOTAL ESTIMADO:* *$${total} USD*\n\n`;
+            msj += `\\n*TOTAL ESTIMADO:* *$${total} USD*\\n\\n`;
             msj += `📌 _Tiempos sujetos al tratamiento elegido. Quedamos a su disposición para confirmar su cita._`;
 
             const encoded = encodeURIComponent(msj);
@@ -520,3 +614,9 @@
     </script>
 </body>
 </html>
+"""
+
+with open("index.html", "w", encoding="utf-8") as f:
+    f.write(html_content)
+
+print("File index.html re-written successfully.")
